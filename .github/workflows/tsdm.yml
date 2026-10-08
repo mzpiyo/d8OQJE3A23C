@@ -1,0 +1,33 @@
+name: TSDM Auto Tasks
+
+on:
+  schedule:
+    - cron: '0 1 * * *'
+    - cron: '0 0,6,12,18 * * *'
+  workflow_dispatch: # 允许手动触发
+
+concurrency:
+  group: tsdm-tasks
+  cancel-in-progress: false
+
+jobs:
+  run-tasks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Execute TSDM Tasks
+        env:
+          TSDM_COOKIE: ${{ secrets.TSDM_COOKIE }}
+          GOTIFY_URL: ${{ secrets.GOTIFY_URL }}
+          GOTIFY_TOKEN: ${{ secrets.GOTIFY_TOKEN }}
+        run: python tsdm.py
